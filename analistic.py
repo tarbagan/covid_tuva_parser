@@ -145,5 +145,5 @@ data = {'today': today, 'rt': rt, 'pcr': pcr, 'rec': rec, 'news': news}
 
 json_out = json.dumps(data, ensure_ascii=False)
 print (json_out)
-with open(file_out, 'w') as file:
+with open(file_out, 'w', encoding='utf-8') as file:
     file.write(str(json_out))
