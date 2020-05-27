@@ -170,39 +170,56 @@ def kog(text):
         if x[0]:
             kogun = etalon[x[1]]
             data = [[n for n in x if n.isdigit()] for x in x[0]][0]
-            kogun['infection'] = data[0]
-            if kogun['name'] != 'Кызыл':
-                koguun_all.append(kogun)
+            if data:
+                kogun['infection'] = data[0]
+                if kogun['name'] != 'Кызыл':
+                    koguun_all.append(kogun)
     return koguun_all
 
 
+
 infection_all = []
+infection_koguun = []
 for url in gen_pai():
     soup = request_url(url)
     for news in get_info(soup):
+        url = news.find('h2').find('a').get('href')
+        url = f'https://minzdravtuva.ru{url}'
         title = news.find('h2').text
         title = clear(title)
         date = news.time.attrs['datetime']
-        content = news.find('p').text
-        content = clear(content)
+
 
         if title[0:12] == 'Эпидситуация':
+            soup = request_url(url)
+            html = soup.find('div', {'itemprop': 'articleBody'})
+            content = html.text
+            content = clear(content)
             if content:
                 date = date[:10]
                 data = {'date': date, 'infection': zar(content), 'lab': isl(content), 'recovered': zdor(content),
                         'dead': dead(content), 'news': content}
                 infection_all.append(data)
 
-                #print (kog(content))
-
+                koguun = kog(content)
+                for k in koguun:
+                    k['date'] = data
+                    infection_koguun.append(koguun)
 
 try:
-    csv_columns = ['date', 'infection', 'lab', 'recovered', 'dead', 'news']
+    csv_columns = ['date', 'infection', 'lab', 'recovered', 'dead', 'news', 'koguun']
     with open(file, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
         writer.writeheader()
         for data in infection_all:
             writer.writerow(data)
+except IOError:
+    print("I/O error")
+
+try:
+    json_out = json.dumps(infection_koguun, ensure_ascii=False)
+    with open(file_kog, 'w', encoding='utf-8') as file:
+        file.write(str(json_out))
 except IOError:
     print("I/O error")
 
