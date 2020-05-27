@@ -203,7 +203,7 @@ for url in gen_pai():
 
                 koguun = kog(content)
                 for k in koguun:
-                    k['date'] = data
+                    k['date'] = date
                     infection_koguun.append(koguun)
 
 try:
